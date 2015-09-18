@@ -175,7 +175,6 @@ public class BlastPlus implements Iterable<Result> {
                 program == Program.BLASTN || 
                 program == Program.TBLASTN ||
                 program == Program.TBLASTX) {
-            //FastaWriterHelper.writeNucleotideSequence(database, sequences);
             writeFasta(database, sequences);
         } else {
             FastaWriterHelper.writeProteinSequence(database, sequences);
@@ -366,7 +365,7 @@ public class BlastPlus implements Iterable<Result> {
                 throw new RuntimeException("Program interrupted");
             }
             
-            // outputstream serves only for debug purposes
+            // outputstream needed only for debug purposes
             java.util.Scanner s = new java.util.Scanner(stdout).useDelimiter("\\A");
             String o = s.hasNext() ? s.next() : "";
             
@@ -456,8 +455,8 @@ public class BlastPlus implements Iterable<Result> {
         
         File queryFile,databaseFile;
         if (args.length == 0) {
-            databaseFile = new File("S:\\Genome finishing\\SNAKE\\test_files\\16SMicrobial.fasta");
-            queryFile = new File("S:\\\\Genome finishing\\\\SNAKE\\\\test_files\\\\less_queries.fasta");
+            databaseFile = new File("16SMicrobial.fasta");
+            queryFile = new File("less_queries.fasta");
         } else {
             databaseFile = new File(args[0]);
             queryFile = new File(args[1]);
@@ -477,7 +476,6 @@ public class BlastPlus implements Iterable<Result> {
             searchEngine.setDatabase(sequences);
         }
         
-        //LinkedHashMap<String, DNASequence> querySeqs = FastaReaderHelper.readFastaDNASequence(queryFile);
         LinkedHashMap<String, DNASequence> querySeqs = readFasta(queryFile);
         
         sequences = new ArrayList();
@@ -493,10 +491,6 @@ public class BlastPlus implements Iterable<Result> {
 
 /**
  * helper class to check the operating system this Java VM runs in
- * http://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
- * compare to
- * http://svn.terracotta.org/svn/tc/dso/tags/2.6.4/code/base/common/src/com/tc/util/runtime/Os.java
- * http://www.docjar.com/html/api/org/apache/commons/lang/SystemUtils.java.html
  */
 final class OsCheck {
 
@@ -515,7 +509,7 @@ final class OsCheck {
      * detected the operating system from the os.name System property and cache
      * the result
      *     
-* @returns - the operating system detected
+     * @returns - the operating system detected
      */
     public static OSType getOperatingSystemType() {
         if (detectedOS == null) {
