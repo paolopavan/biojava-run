@@ -58,8 +58,8 @@ public class BlastPlus implements Iterable<Result> {
      * path of database index files
      */
     private File queryFile;
-    List<AbstractSequence> querySequences = null;
-    List<AbstractSequence> databaseSequences = null;
+    List<Sequence> querySequences = null;
+    List<Sequence> databaseSequences = null;
     /**
      * internally used to iterate results. 
      * Since this module is a wrapper around a program, this property is designed
