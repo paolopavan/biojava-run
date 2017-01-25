@@ -24,8 +24,7 @@ import org.biojava.nbio.core.sequence.io.FileProxyDNASequenceCreator;
 import org.biojava.nbio.core.sequence.io.GenericFastaHeaderFormat;
 import org.biojava.nbio.core.sequence.io.GenericFastaHeaderParser;
 import org.biojava.nbio.core.sequence.template.Compound;
-//import org.biojava.nbio.genome.query.BlastXMLQuery;
-import org.biojava.nbio.core.search.io.blast.BlastXMLQuery;
+import org.biojava.nbio.core.search.io.blast.BlastXMLParser;
 import org.biojava.nbio.core.search.io.Result;
 import org.biojava.nbio.core.search.io.ResultFactory;
 import org.biojava.nbio.core.search.io.SearchIO;
@@ -143,7 +142,7 @@ public class BlastPlus implements Iterable<Result> {
         java.util.Scanner s = new java.util.Scanner(stdout).useDelimiter("\\n");
         String o = s.hasNext() ? s.next() : "";
         
-        ResultFactory f = new BlastXMLQuery();
+        ResultFactory f = new BlastXMLParser();
         f.setQueryReferences(querySequences);
         f.setDatabaseReferences(databaseSequences);
         
