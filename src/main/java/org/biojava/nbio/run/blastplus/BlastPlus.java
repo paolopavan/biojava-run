@@ -63,7 +63,7 @@ public class BlastPlus implements Iterable<Result> {
     /**
      * internally used to iterate results. 
      * Since this module is a wrapper around a program, this property is designed
-     * to be setted by a SearchIO reader built on the program output file.
+     * to be set by a SearchIO reader built on the program output file.
      */
     private Iterator<Result> resultsIterator;
     
@@ -244,7 +244,7 @@ public class BlastPlus implements Iterable<Result> {
         //useDelimiter("\\A") to scan all the version output
         java.util.Scanner s = new java.util.Scanner(stdout).useDelimiter("\\n");
         
-        return s.hasNext() ? s.next() : "";
+        return s.hasNext() ? s.next().trim() : "";
     }
 
     private File getProgramExecutable() {
