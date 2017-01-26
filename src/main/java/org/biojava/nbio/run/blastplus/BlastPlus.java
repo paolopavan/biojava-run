@@ -185,6 +185,30 @@ public class BlastPlus implements Iterable<Result> {
     public void setDatabase(Sequence ... sequences) throws Exception{
         setDatabase(new ArrayList(Arrays.asList(sequences)));
     }
+    
+    public void setQuery(String path, String baseName) {
+        setQuery(new File(path+"/"+baseName));
+    }
+    
+    public void setQuery(File f) {
+        queryFile = f;
+    }
+    
+    public void setQuery(String path, String baseName, boolean maintainQueryReferences) throws IOException {
+        setQuery(new File(path+"/"+baseName), maintainQueryReferences);
+    }
+    
+    public void setQuery(File f, boolean maintainQueryReferences) throws IOException {
+        queryFile = f;
+        if (maintainQueryReferences) {
+            LinkedHashMap<String, DNASequence> querySeqs = readFasta(queryFile);
+        
+            List sequences = new ArrayList();
+            for (DNASequence s: querySeqs.values()) {
+                sequences.add(s);
+            }
+        }
+    }
 
     public void setQuery(List sequences) throws Exception {
         queryFile = File.createTempFile("query", ".fasta");
