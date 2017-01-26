@@ -464,52 +464,6 @@ public class BlastPlus implements Iterable<Result> {
             }
         };
     }
-    
-    
-/**
- * just for test purposes. must be removed
- * @param args
- * @throws Exception 
- */
-    public static void main(String[] args) throws Exception{
-        BlastPlus searchEngine = new BlastPlus();
-        searchEngine.setProgram(Program.BLASTN);
-        System.out.println("Blast version: " +searchEngine.getVersion()+"-");
-        
-        File queryFile,databaseFile;
-        if (args.length == 0) {
-            databaseFile = new File("16SMicrobial.fasta");
-            queryFile = new File("less_queries.fasta");
-        } else {
-            databaseFile = new File(args[0]);
-            queryFile = new File(args[1]);
-        }
-        
-        ArrayList sequences;
-        if (false) {
-            searchEngine.setDatabase(databaseFile);
-        } else {
-            LinkedHashMap<String, DNASequence> databaseSeqs = readFasta(databaseFile);
-
-            sequences = new ArrayList();
-            for (DNASequence s: databaseSeqs.values()) {
-                sequences.add(s);
-            }
-            databaseSeqs = null;
-            searchEngine.setDatabase(sequences);
-        }
-        
-        LinkedHashMap<String, DNASequence> querySeqs = readFasta(queryFile);
-        
-        sequences = new ArrayList();
-        for (DNASequence s: querySeqs.values()) {
-            sequences.add(s);
-        }
-        querySeqs=null;
-        searchEngine.setQuery(sequences);
-        
-        searchEngine.run();
-    }
 }
 
 /**

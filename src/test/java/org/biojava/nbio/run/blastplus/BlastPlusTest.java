@@ -48,10 +48,33 @@ public class BlastPlusTest {
     @Test
     public void testRun() throws Exception {
         System.out.println("run");
-        BlastPlus instance = new BlastPlus();
-        instance.run();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
+        // test on a big database
+        String databaseResource = "/org/biojava/nbio/run/blastplus/16SMicrobial.fasta";
+        String queriesResource = "/org/biojava/nbio/run/blastplus/queries.fasta";
+        
+        BlastPlus searchEngine = new BlastPlus();
+        searchEngine.setProgram(BlastPlus.Program.BLASTN);
+        
+        File queryFile,databaseFile;
+        databaseFile = new File(this.getClass().getResource(databaseResource).getFile());
+        queryFile = new File(this.getClass().getResource(queriesResource).getFile());
+        
+        searchEngine.setDatabase(databaseFile);
+        searchEngine.setQuery(queryFile);
+        
+        searchEngine.run();
+        
+        // cannot verify all the results but at least 
+        // they must be exactly as the query sent:
+        int counter=0;
+        Iterator<Result> iterator = searchEngine.iterator();
+        while (iterator.hasNext()) {
+            counter++;
+            iterator.next();
+        }
+        assertEquals(counter, 71);
+        
     }
 
     /**
@@ -206,11 +229,22 @@ public class BlastPlusTest {
     public void testGetVersion() throws Exception {
         System.out.println("getVersion");
         BlastPlus instance = new BlastPlus();
-        String expResult = "";
-        String result = instance.getVersion();
+        String expResult, result;
+        
+        instance.setProgram(BlastPlus.Program.BLASTN);
+        expResult = "blastn: 2.2.29+";
+        result = instance.getVersion();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
+        instance.setProgram(BlastPlus.Program.BLASTP);
+        expResult = "blastp: 2.2.29+";
+        result = instance.getVersion();
+        assertEquals(expResult, result);
+        
+        instance.setProgram(BlastPlus.Program.BLASTX);
+        expResult = "blastx: 2.2.29+";
+        result = instance.getVersion();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -226,17 +260,4 @@ public class BlastPlusTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
-    /**
-     * Test of main method, of class BlastPlus.
-     */
-    @Test
-    public void testMain() throws Exception {
-        System.out.println("main");
-        String[] args = null;
-        BlastPlus.main(args);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-    
 }
