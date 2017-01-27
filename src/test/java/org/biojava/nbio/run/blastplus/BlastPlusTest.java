@@ -6,6 +6,7 @@
 package org.biojava.nbio.run.blastplus;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import org.biojava.nbio.core.search.io.Result;
@@ -81,7 +82,7 @@ public class BlastPlusTest {
      * Test of setDatabase method, of class BlastPlus.
      */
     @Test
-    public void testSetDatabase_String_String() {
+    public void testSetDatabase_String_String() throws IOException {
         System.out.println("setDatabase");
         String path = "";
         String baseName = "";
@@ -95,7 +96,7 @@ public class BlastPlusTest {
      * Test of setDatabase method, of class BlastPlus.
      */
     @Test
-    public void testSetDatabase_File() {
+    public void testSetDatabase_File() throws IOException {
         System.out.println("setDatabase");
         File f = null;
         BlastPlus instance = new BlastPlus();
@@ -108,7 +109,7 @@ public class BlastPlusTest {
      * Test of setDatabase method, of class BlastPlus.
      */
     @Test
-    public void testSetDatabase_List() throws Exception {
+    public void testSetDatabase_List() throws IOException {
         System.out.println("setDatabase");
         List sequences = null;
         BlastPlus instance = new BlastPlus();
@@ -121,7 +122,7 @@ public class BlastPlusTest {
      * Test of setDatabase method, of class BlastPlus.
      */
     @Test
-    public void testSetDatabase_SequenceArr() throws Exception {
+    public void testSetDatabase_SequenceArr() throws IOException {
         System.out.println("setDatabase");
         Sequence[] sequences = null;
         BlastPlus instance = new BlastPlus();
@@ -134,7 +135,7 @@ public class BlastPlusTest {
      * Test of setQuery method, of class BlastPlus.
      */
     @Test
-    public void testSetQuery_List() throws Exception {
+    public void testSetQuery_List() throws IOException {
         System.out.println("setQuery");
         List sequences = null;
         BlastPlus instance = new BlastPlus();
@@ -147,7 +148,7 @@ public class BlastPlusTest {
      * Test of setQuery method, of class BlastPlus.
      */
     @Test
-    public void testSetQuery_SequenceArr() throws Exception {
+    public void testSetQuery_SequenceArr() throws IOException {
         System.out.println("setQuery");
         Sequence[] sequences = null;
         BlastPlus instance = new BlastPlus();
@@ -226,7 +227,7 @@ public class BlastPlusTest {
      * Test of getVersion method, of class BlastPlus.
      */
     @Test
-    public void testGetVersion() throws Exception {
+    public void testGetVersion() throws IOException {
         System.out.println("getVersion");
         BlastPlus instance = new BlastPlus();
         String expResult, result;

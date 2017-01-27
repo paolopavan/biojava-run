@@ -78,7 +78,7 @@ public class BlastPlus implements Iterable<Result> {
 
     }
 
-    public void run() throws IOException, ParseException, IllegalStateException, Exception { // TODO: modify Exception
+    public void run() throws IOException, ParseException, IllegalStateException, IOException {
         if (queryFile == null || queryFile.length() == 0) throw new IllegalStateException("Query sequences not specified.");
         if (database.length()==0) throw new IllegalStateException("Database sequences not specified.");
         
@@ -150,21 +150,21 @@ public class BlastPlus implements Iterable<Result> {
         resultsIterator = reader.iterator();
     }
 
-    public void setDatabase(String path, String baseName) {
+    public void setDatabase(String path, String baseName) throws IOException {
         database = new File(path+"/"+baseName);
         indexPath = new File(path);
         //launch formatdb
         formatDatabase();
     }
     
-    public void setDatabase(File f) {
+    public void setDatabase(File f) throws IOException {
         database = f;
         indexPath = database.getParentFile();
         //launch formatdb
         formatDatabase();
     }
 
-    public void setDatabase(List sequences) throws Exception {
+    public void setDatabase(List sequences) throws IOException {
         databaseSequences = sequences;
         database = File.createTempFile("database", ".fasta");
         if (!DEBUG) database.deleteOnExit();
@@ -182,7 +182,7 @@ public class BlastPlus implements Iterable<Result> {
         formatDatabase();
     }
     
-    public void setDatabase(Sequence ... sequences) throws Exception{
+    public void setDatabase(Sequence ... sequences) throws IOException{
         setDatabase(new ArrayList(Arrays.asList(sequences)));
     }
     
@@ -210,7 +210,7 @@ public class BlastPlus implements Iterable<Result> {
         }
     }
 
-    public void setQuery(List sequences) throws Exception {
+    public void setQuery(List sequences) throws IOException {
         queryFile = File.createTempFile("query", ".fasta");
         if (!DEBUG) queryFile.deleteOnExit();
         if (
@@ -224,7 +224,7 @@ public class BlastPlus implements Iterable<Result> {
         querySequences = sequences;
     }
     
-    public void setQuery(Sequence ... sequences ) throws Exception{
+    public void setQuery(Sequence ... sequences ) throws IOException{
         setQuery(new ArrayList(Arrays.asList(sequences)));
     }
 
@@ -340,76 +340,74 @@ public class BlastPlus implements Iterable<Result> {
     /**
      * not to be called directly, use setDatabase() instead
      */
-    private void formatDatabase() {
+    private void formatDatabase() throws IOException{
         String resource = baseResourcePath;
         resource += OS+ DM + "/makeblastdb";
         File exe = unpackResourceFile(resource);
 
         List<String> commandString = new ArrayList();
-        try {
-            // replace is a needed workaround
-            commandString.add(exe.getAbsolutePath().replaceAll("%20"," "));
-            commandString.add("-in");
-            commandString.add(database.getAbsolutePath().replaceAll("%20"," "));
-            commandString.add("-out");
-            commandString.add((indexPath.getPath() + "//"+ database.getName()).replaceAll("%20"," "));
-            commandString.add("-dbtype");
-            
-            if (program == null) throw new RuntimeException("Blast program (blastn/blastp...) not declared.");
-            switch (program) {
-                case BLASTP:
-                    commandString.add("prot");
-                    break;
-                case BLASTN : 
-                    commandString.add("nucl");
-                    break;
-                case TBLASTN:
-                    commandString.add("nucl");
-                    break;
-                case TBLASTX:
-                    commandString.add("nucl");
-                    break;
-                case BLASTX:
-                    commandString.add("prot");
-                    break;
-            }
-            
-            ProcessBuilder pb = new ProcessBuilder(commandString);
-            pb.redirectErrorStream(true);
-            Process p = pb.start();
-            
-            InputStream stdout = p.getInputStream ();
-            
-            int result;
-            try {
-                result = p.waitFor();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(BlastPlus.class.getName()).log(Level.SEVERE, null, ex);
-                throw new RuntimeException("Program interrupted");
-            }
-            
-            // outputstream needed only for debug purposes
-            java.util.Scanner s = new java.util.Scanner(stdout).useDelimiter("\\A");
-            String o = s.hasNext() ? s.next() : "";
-            
-            // check database index files creation and process result
-            String baseName = (indexPath.getPath() + "//"+ database.getName()).replaceAll("%20"," ");
-            File nhr = new File(baseName+".nhr");
-            File nin = new File(baseName+".nin");
-            File nsq = new File(baseName+".nsq");
-            
-            if (!DEBUG) {
-                nhr.deleteOnExit();
-                nin.deleteOnExit();
-                nsq.deleteOnExit();
-            }
-            
-            if (!nhr.exists() || !nin.exists()||!nsq.exists() || result != 0) {
-                throw new RuntimeException("Error: cannot write database indexes");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error: unexpected IOException\n"+e.getMessage());
+
+        // replace is a needed workaround
+        commandString.add(exe.getAbsolutePath().replaceAll("%20"," "));
+        commandString.add("-in");
+        commandString.add(database.getAbsolutePath().replaceAll("%20"," "));
+        commandString.add("-out");
+        commandString.add((indexPath.getPath() + "//"+ database.getName()).replaceAll("%20"," "));
+        commandString.add("-dbtype");
+
+        if (program == null) throw new RuntimeException("Blast program (blastn/blastp...) not declared.");
+        switch (program) {
+            case BLASTP:
+                commandString.add("prot");
+                break;
+            case BLASTN : 
+                commandString.add("nucl");
+                break;
+            case TBLASTN:
+                commandString.add("nucl");
+                break;
+            case TBLASTX:
+                commandString.add("nucl");
+                break;
+            case BLASTX:
+                commandString.add("prot");
+                break;
         }
+
+        ProcessBuilder pb = new ProcessBuilder(commandString);
+        pb.redirectErrorStream(true);
+        Process p = pb.start();
+
+        InputStream stdout = p.getInputStream ();
+
+        int result;
+        try {
+            result = p.waitFor();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(BlastPlus.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException("Program interrupted");
+        }
+
+        // outputstream needed only for debug purposes
+        java.util.Scanner s = new java.util.Scanner(stdout).useDelimiter("\\A");
+        String o = s.hasNext() ? s.next() : "";
+
+        // check database index files creation and process result
+        String baseName = (indexPath.getPath() + "//"+ database.getName()).replaceAll("%20"," ");
+        File nhr = new File(baseName+".nhr");
+        File nin = new File(baseName+".nin");
+        File nsq = new File(baseName+".nsq");
+
+        if (!DEBUG) {
+            nhr.deleteOnExit();
+            nin.deleteOnExit();
+            nsq.deleteOnExit();
+        }
+
+        if (!nhr.exists() || !nin.exists()||!nsq.exists() || result != 0) {
+            throw new RuntimeException("Error: cannot write database indexes");
+        }
+
     }
     
     private static LinkedHashMap<String, DNASequence> readFasta(File f) throws FileNotFoundException, IOException {
@@ -430,7 +428,7 @@ public class BlastPlus implements Iterable<Result> {
         return ss;
     }
     
-    private static void writeFasta(File f, List sequences) throws Exception{
+    private static void writeFasta(File f, List sequences) throws IOException{
         FileOutputStream os = new FileOutputStream(f);
         FastaWriter<DNASequence, Compound> fastaProxyWriter
                 = new FastaWriter<DNASequence, Compound>(
