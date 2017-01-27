@@ -7,9 +7,20 @@ package org.biojava.nbio.run.blastplus;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import org.biojava.nbio.core.search.io.Hit;
+import org.biojava.nbio.core.search.io.Hsp;
 import org.biojava.nbio.core.search.io.Result;
+import org.biojava.nbio.core.sequence.ChromosomeSequence;
+import org.biojava.nbio.core.sequence.DNASequence;
+import org.biojava.nbio.core.sequence.compound.AmbiguityDNACompoundSet;
+import org.biojava.nbio.core.sequence.io.FileProxyDNASequenceCreator;
+import org.biojava.nbio.core.sequence.io.GenbankReader;
+import org.biojava.nbio.core.sequence.io.GenbankSequenceParser;
+import org.biojava.nbio.core.sequence.io.GenericGenbankHeaderParser;
 import org.biojava.nbio.core.sequence.template.Sequence;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -66,8 +77,8 @@ public class BlastPlusTest {
         
         searchEngine.run();
         
-        // cannot verify all the results but at least 
-        // they must be exactly as the query sent:
+        // cannot verify all the results and it is beyond the purpose of this test
+        // but at least they must enumerate exactly as the query sent:
         int counter=0;
         Iterator<Result> iterator = searchEngine.iterator();
         while (iterator.hasNext()) {
@@ -76,6 +87,65 @@ public class BlastPlusTest {
         }
         assertEquals(counter, 71);
         
+        String _16S = 
+                "TTAAATTGAGAGTTTGATCCTGGCTCAGGATGAACGCTGGTGGCGTGCCTAATACATGCAAGT"
+                + "CGTACGCTAGCCGCTGAATTGATCCTTCGGGTGAAGTGAGGCAATGACTAGAGTGGCGAAC"
+                + "TGGTGAGTAACACGTAAGAAACCTGCCCTTTAGTGGGGGATAACATTTGGAAACAGATGCT"
+                + "AATACCGCGTAACAACAAATCACACATGTGATCTGTTTGAAAGGTCCTTTTGGATCGCTAG"
+                + "AGGATGGTCTTGCGGCGTATTAGCTTGTTGGTAGGGTAGAAGCCTACCAAGGCAATGATGC"
+                + "GTAGCCGAGTTGAGAGACTGGCCGGCCACATTGGGACTGAGACACTGCCCAAACTCCTACG"
+                + "GGAGGCTGCAGTAGGGAATTTTCCGCAATGCACGAAAGTGTGACGGAGCGACGCCGCGTGT"
+                + "GTGATGAAGGCTTTCGGGTCGTAAAGCACTGTTGTAAGGGAAGAATAACTGAATTCAGAGA"
+                + "AAGTTTTCAGCTTGACGGTACCTTACCAGAAAGGGATGGCTAAATACGTGCCAGCAGCCGC"
+                + "GGTAATACGTATGTCCCGAGCGTTATCCGGATTTATTGGGCGTAAAGCGAGCGCAGACGGT"
+                + "TTATTAAGTCTGATGTGAAATCCCGAGGCCCAACCTCGGAACTGCATTGGAAACTGATTTA"
+                + "CTTGAGTGCGATAGAGGCAAGTGGAACTCCATGTGTAGCGGTGAAATGCGTAGATATGTGG"
+                + "AAGAACACCAGTGGCGAAAGCGGCTTGCTAGATCGTAACTGACGTTGAGGCTCGAAAGTAT"
+                + "GGGTAGCAAACGGGATTAGATACCCCGGTAGTCCATACCGTAAACGATGGGTGCTAGTTGT"
+                + "TAAGAGGTTTCCGCCTCCTAGTGACGTAGCAAACGCATTAAGCACCCCGCCTGAGGAGTAC"
+                + "GGCCGCAAGGCTAAAACTTAAAGGAATTGACGGGGACCCGCACAAGCGGTGGAGCATGTGG"
+                + "TTTAATTCGAAGATACGCGAAAAACCTTACCAGGTCTTGACATACCAATGATCGCTTTTGT"
+                + "AATGAAAGCTTTTCTTCGGAACATTGGATACAGGTGGTGCATGGTCGTCGTCAGCTCGTGT"
+                + "CGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGTTATTAGTTGCCAGCATTT"
+                + "AGTTGGGCACTCTAATGAGACTGCCGGTGATAAACCGGAGGAAGGTGGGGACGACGTCAGA"
+                + "TCATCATGCCCCTTATGACCTGGGCAACACACGTGCTACAATGGGAAGTACAACGAGTCGC"
+                + "AAACCGGCGACGGTAAGCTAATCTCTTAAAACTTCTCTCAGTTCGGACTGGAGTCTGCAAC"
+                + "TCGACTCCACGAAGGCGGAATCGCTAGTAATCGCGAATCAGCATGTCGCGGTGAATACGTT"
+                + "CCCGGGTCTTGTACACACCGCCCGTCAAATCATGGGAGTCGGAAGTACCCAAAGTCGCTTG"
+                + "GCTAACTTTTAGAGGCCGGTGCCTAAGGTAAAATCGATGACTGGGATTAAGTCGTAACAAG"
+                + "GTAGCCGTAGGAGAACCTGCGGCTGGATCACCTCCTTTCT";
+        Sequence query = new DNASequence(_16S);
+        
+        String testGenomeResource = "/org/biojava/nbio/run/blastplus/genome.gbff";
+        databaseFile = new File(this.getClass().getResource(testGenomeResource).getFile());
+        GenbankReader gbProxyReader
+            = new GenbankReader(
+                    databaseFile,
+                    new GenericGenbankHeaderParser(),
+                    new FileProxyDNASequenceCreator(
+                            databaseFile,
+                            new AmbiguityDNACompoundSet(),
+                            new GenbankSequenceParser()
+                    )
+            );
+        LinkedHashMap<String, ChromosomeSequence> ss = gbProxyReader.process();
+        
+        searchEngine.setDatabase(ss.get("CP000411"));
+        searchEngine.setQuery(query);
+        
+        searchEngine.run();
+        // temporary data structures to hold the results.
+        // there must be 1 result, 1 hit and 2 Hsp
+        for (Result r: searchEngine){
+            for (Hit h: r){
+                assertTrue(h.getHitDef().equals("CP000411             1780517 bp    DNA     circular BCT 28-JAN-2014"));
+                assertTrue(h.getHitLen()==1780517);
+                for (Hsp s: h) {
+                    assertTrue(s.getHspHitFrom() == 1278699 || s.getHspHitFrom() == 616309);
+                    assertTrue(s.getHspHitTo() == 1277133 || s.getHspHitTo() == 617875);   
+                }
+            }
+        }
     }
 
     /**
